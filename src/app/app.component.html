@@ -13,7 +13,7 @@
       
     <div class="mb-2 w-100">
         <h2 >Zoom</h2>
-        <mat-slider min="1" max="20" step="1" value="1" discrete [displayWith]="getValue" class="w-100">
+        <mat-slider min="1" max="5" step=".2" value="1" discrete [displayWith]="getValue" class="w-100">
           <input [(value)]="zoom" matSliderThumb />
         </mat-slider>
       </div>
@@ -21,11 +21,7 @@
     <div class="image-container">
       <img
         [src]="imageSrc"
-        [ngStyle]="{ 
-            filter: 'brightness(' + brightness + ')',
-            transform: 'scale(' + zoom + ')',
-            'transform-origin': left + 'px ' + top + 'px'
-         }" #image
+        [ngStyle]="getImageAttributes()" #image
       />
     </div>
 </div>
