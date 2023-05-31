@@ -1,0 +1,27 @@
+.img-container {
+  width: auto;
+  height: 100%;
+  overflow: hidden;
+}
+
+img {
+  width: 100%;
+  object-fit: scale-down;
+}
+
+mat-toolbar {
+  margin-bottom: 10px;
+}
+
+:host {
+  position: relative;
+  display: block;
+  font-family: "Lato";
+}
+
+.image-container {
+  position: relative;
+  width: auto;
+  height: 100%;
+  overflow: hidden;
+}
