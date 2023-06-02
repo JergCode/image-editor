@@ -15,9 +15,9 @@ const GAP = 50;
 })
 export class AppComponent implements AfterViewInit, OnDestroy {
   viewer: any;
-  imageSrc =
-    'https://www.motortrend.com/uploads/2022/08/008-gm-electromotive-history-rocky-rotella.jpg';
+  imageSrc = '/assets/img/pic1.png';
   brightness: number = 1;
+  contrast: number = 1;
   zoom: number = 1;
   left: number = 0;
   top: number = 0;
@@ -59,7 +59,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   getImageAttributes(): object {
     return {
-      filter: 'brightness(' + this.brightness + ')',
+      filter:
+        'brightness(' + this.brightness + ') contrast(' + this.contrast + ')',
       transform: 'scale(' + this.zoom + ')',
       'transform-origin': this.left + 'px ' + this.top + 'px',
     };
