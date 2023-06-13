@@ -1,4 +1,11 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 
 const GAP = 50;
 @Component({
@@ -6,14 +13,17 @@ const GAP = 50;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements AfterViewInit {
-  imageSrc = '/assets/img/pic1.png';
+export class AppComponent implements AfterViewInit, OnChanges {
+  imageSrc = '/assets/img/pic3.jpg';
   brightness: number = 1;
   contrast: number = 1;
   zoom: number = 1;
   left: number = 0;
   top: number = 0;
   imageBouding: DOMRect;
+
+  clickPositionX: number = 0;
+  clickPositionY: number = 0;
 
   constructor(image: ElementRef<HTMLImageElement>) {
     this.image = image;
@@ -24,24 +34,35 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.image.nativeElement.ondragstart = () => false;
-    this.imageBouding = this.image.nativeElement.getBoundingClientRect();
   }
 
-  onMouseInImage(event: MouseEvent) {
-    document.addEventListener('wheel', this.onWheelScroll);
+  ngOnChanges(changes: SimpleChanges): void {
+    this.image.nativeElement.ondragstart = () => false;
+    if (this.zoom == 1) {
+      this.left = 0;
+      this.top = 0;
+      this.clickPositionX = -1;
+      this.clickPositionY = -1;
+    }
   }
 
   onWheelScroll = (event: WheelEvent) => {
     const newzoom = this.zoom - event.deltaY * 0.001;
     const y = event.clientY;
     const x = event.clientX;
-    if (this.isWithinImageBoundary(x, y))
-      if (newzoom < 6) {
+    if (this.isWithinImageBoundary(x, y)) {
+      if (newzoom < 2.6) {
         this.zoom = Math.max(newzoom, 1);
         this.top = this.getTopPosition(y);
         this.left = this.getLeftPosition(x);
       }
+    }
   };
+
+  onMouseInImage(event: MouseEvent) {
+    this.imageBouding = this.image.nativeElement.getBoundingClientRect();
+    document.addEventListener('wheel', this.onWheelScroll);
+  }
 
   onMouseOutImage(event: MouseEvent) {
     document.removeEventListener('wheel', this.onWheelScroll);
@@ -49,6 +70,9 @@ export class AppComponent implements AfterViewInit {
   }
 
   onMousedown(event: MouseEvent) {
+    this.clickPositionX = event.clientX;
+    this.clickPositionY = event.clientY;
+
     if (this.zoom > 1) {
       document.addEventListener('mousemove', this.onMouseMove);
 
@@ -56,23 +80,32 @@ export class AppComponent implements AfterViewInit {
         document.removeEventListener('mousemove', this.onMouseMove);
         this.image.nativeElement.onmouseup = null;
       };
+    } else {
+      this.clickPositionX = 0;
+      this.clickPositionY = 0;
+      this.left = 0;
+      this.top = 0;
     }
   }
 
   onMouseMove = (event: MouseEvent) => {
-    console.log('x', event.x - this.imageBouding.left);
-    console.log('y', event.y - this.imageBouding.top);
-    this.top = this.getTopPosition(event.y - this.imageBouding.top);
-    this.left = this.getLeftPosition(event.x - this.imageBouding.left);
+    const y = this.top + (event.clientY - this.clickPositionY);
+    this.top = y > this.imageBouding.bottom ? this.top : y; //this.getPicLeftPosition(event.offsetX);
+    // this.top = this.getPicTopPosition(event.offsetY);
+
+    const x = this.left + (event.clientX - this.clickPositionX);
+    this.left = x > this.imageBouding.right ? this.left : x; //this.getPicLeftPosition(event.offsetX);
   };
 
   isWithinImageBoundary(x: number, y: number): boolean {
-    return (
+    const isWithin =
       x > this.imageBouding.left + GAP &&
       x < this.imageBouding.right - GAP &&
       y > this.imageBouding.top + GAP &&
-      y < this.imageBouding.bottom - GAP
-    );
+      y < this.imageBouding.bottom - GAP;
+    console.log(isWithin);
+
+    return isWithin;
   }
 
   getImageAttributes(): object {
@@ -86,26 +119,32 @@ export class AppComponent implements AfterViewInit {
 
   getLeftPosition(x: number): number {
     const left =
-      this.imageBouding == null
-        ? x
-        : x > this.imageBouding.right
+      x > this.imageBouding.right
         ? x - this.zoom / 2
         : x - this.zoom / 2 - 2 * GAP;
 
     return Math.min(left, x);
   }
 
-  getPicTopPosition(y: number) {}
-
   getTopPosition(y: number) {
     const top =
-      this.imageBouding == null
-        ? y
-        : y > this.imageBouding.bottom
+      y > this.imageBouding.bottom
         ? y - this.zoom / 2
         : y - this.zoom / 2 - 5 * GAP;
 
     return Math.min(top, y);
+  }
+
+  getPicLeftPosition(x: number): number {
+    const left = x > this.imageBouding.right ? this.imageBouding.right : x;
+
+    return left;
+  }
+
+  getPicTopPosition(y: number): number {
+    const top = y < this.imageBouding.bottom ? this.imageBouding.bottom : y;
+
+    return top;
   }
 
   getValue(value: number): string {

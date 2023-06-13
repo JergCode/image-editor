@@ -40,8 +40,8 @@
     <h2>Zoom</h2>
     <mat-slider
       min="1"
-      max="5"
-      step=".2"
+      max="2.6"
+      step=".1"
       value="1"
       discrete
       [displayWith]="getValue"
@@ -52,13 +52,16 @@
   </div>
 
   <div class="image-container">
-    <img
-      [src]="imageSrc"
-      [ngStyle]="getImageAttributes()"
-      #image
+    <div
       (mouseenter)="onMouseInImage($event)"
       (mouseleave)="onMouseOutImage($event)"
       (mousedown)="onMousedown($event)"
-    />
+      #image
+    >
+      <img [src]="imageSrc" [ngStyle]="getImageAttributes()" />
+    </div>
   </div>
+
+  <p>click X: {{ clickPositionX }}</p>
+  <p>click Y: {{ clickPositionY }}</p>
 </div>
